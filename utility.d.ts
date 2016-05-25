@@ -1,3 +1,4 @@
 export declare class OauthUtility {
-    parseImplicitResponse(responseParameters: Array<String>): Object;
+    static parseImplicitResponse(responseParameters: Array<String>): Object;
+    static buildQuery(params: Object): string;
 }

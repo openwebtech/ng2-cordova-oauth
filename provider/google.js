@@ -4,6 +4,8 @@ var PROVIDER_NAME = "Google";
 var Google = (function () {
     function Google(options) {
         if (options === void 0) { options = {}; }
+        this.apiUrl = 'https://accounts.google.com/o/oauth2/v2/auth';
+        this.approvalUrl = 'https://accounts.google.com/o/oauth2/approval';
         if (!options.clientId || options.clientId == "") {
             throw Error("A " + PROVIDER_NAME + " client id must exist");
         }
@@ -11,28 +13,46 @@ var Google = (function () {
             throw Error("A " + PROVIDER_NAME + " app scope must exist");
         }
         this.googleOptions = options;
-        this.googleOptions.redirectUri = options.hasOwnProperty("redirectUri") ? options.redirectUri : "http://localhost/callback";
-        this.flowUrl = "https://accounts.google.com/o/oauth2/auth?client_id=" + this.googleOptions.clientId + "&redirect_uri=" + this.googleOptions.redirectUri + "&response_type=token&approval_prompt=force&scope=" + this.googleOptions.appScope.join(" ");
+        this.googleOptions.redirectUri = options.redirectUri || "urn:ietf:wg:oauth:2.0:oob";
+        var params = {
+            client_id: this.googleOptions.clientId,
+            redirect_uri: this.googleOptions.redirectUri,
+            response_type: 'code',
+            scope: this.googleOptions.appScope.join(" ")
+        };
+        this.flowUrl = this.apiUrl + '?' + utility_1.OauthUtility.buildQuery(params);
     }
     Google.prototype.login = function () {
         var _this = this;
+        var getTitleScript = 'document.querySelector("title").text;';
+        var approvalUrlPattern = new RegExp('^' + this.approvalUrl);
+        var browserRef;
         return new Promise(function (resolve, reject) {
-            var browserRef = window.cordova.InAppBrowser.open(_this.flowUrl, "_blank", "location=no,clearsessioncache=yes,clearcache=yes");
-            browserRef.addEventListener("loadstart", function (event) {
-                if ((event.url).indexOf(_this.googleOptions.redirectUri) === 0) {
-                    browserRef.removeEventListener("exit", function (event) { });
-                    browserRef.close();
-                    var parsedResponse = (new utility_1.OauthUtility()).parseImplicitResponse(((event.url).split("#")[1]).split("&"));
-                    if (parsedResponse) {
-                        resolve(parsedResponse);
-                    }
-                    else {
-                        reject("Problem authenticating with " + PROVIDER_NAME);
-                    }
-                }
-            });
-            browserRef.addEventListener("exit", function (event) {
+            browserRef = window.cordova.InAppBrowser.open(_this.flowUrl, "_blank", "location=no,clearsessioncache=yes,clearcache=yes");
+            var onExitIAB = function (event) {
                 reject("The " + PROVIDER_NAME + " sign in flow was canceled");
+            };
+            browserRef.addEventListener("exit", onExitIAB);
+            browserRef.addEventListener("loadstop", function (event) {
+                // console.log('loadstop', event);
+                if (!approvalUrlPattern.test(event.url)) {
+                    return;
+                }
+                new Promise(function (resolve2) {
+                    browserRef.executeScript({ code: getTitleScript }, resolve2);
+                })
+                    .then(function (ret) {
+                    // console.log('executeScript', ret);
+                    var title = ret[0] || '';
+                    var titleArray = title.split('=');
+                    if (titleArray[0] === 'Success code' && titleArray[1]) {
+                        browserRef.removeEventListener("exit", onExitIAB);
+                        browserRef.close();
+                        return { access_token: titleArray[1] };
+                    }
+                })
+                    .then(resolve)
+                    .catch(reject);
             });
         });
     };

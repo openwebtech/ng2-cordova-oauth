@@ -33,7 +33,7 @@ export class Imgur implements IOauthProvider {
                 if ((event.url).indexOf(this.imgurOptions.redirectUri) === 0) {
                     browserRef.removeEventListener("exit", (event) => {});
                     browserRef.close();
-                    var parsedResponse = (new OauthUtility()).parseImplicitResponse(((event.url).split("#")[1]).split("&"));
+                    var parsedResponse = OauthUtility.parseImplicitResponse(((event.url).split("#")[1]).split("&"));
                     if (parsedResponse) {
                         resolve(parsedResponse);
                     } else {

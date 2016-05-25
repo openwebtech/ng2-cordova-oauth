@@ -2,7 +2,7 @@
 var OauthUtility = (function () {
     function OauthUtility() {
     }
-    OauthUtility.prototype.parseImplicitResponse = function (responseParameters) {
+    OauthUtility.parseImplicitResponse = function (responseParameters) {
         var parameterMap = {};
         for (var i = 0; i < responseParameters.length; i++) {
             parameterMap[responseParameters[i].split("=")[0]] = responseParameters[i].split("=")[1];
@@ -13,6 +13,11 @@ var OauthUtility = (function () {
         else {
             return null;
         }
+    };
+    OauthUtility.buildQuery = function (params) {
+        return Object.keys(params)
+            .map(function (key) { return (key + "=" + params[key]); })
+            .join('&');
     };
     return OauthUtility;
 }());

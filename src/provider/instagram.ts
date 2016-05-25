@@ -23,7 +23,7 @@ export class Instagram implements IOauthProvider {
         if(!options.clientId || options.clientId == "") {
             throw Error("A " + PROVIDER_NAME + " client id must exist");
         }
-        
+
         let scope = '';
         if(!options.appScope && options.appScope.length > 0) {
             scope = '&scope=' + options.appScope.join('+');
@@ -41,7 +41,7 @@ export class Instagram implements IOauthProvider {
                 if ((event.url).indexOf(this.instagramOptions.redirectUri) === 0) {
                     browserRef.removeEventListener("exit", (event) => {});
                     browserRef.close();
-                    var parsedResponse = (new OauthUtility()).parseImplicitResponse(((event.url).split("#")[1]).split("&"));
+                    var parsedResponse = OauthUtility.parseImplicitResponse(((event.url).split("#")[1]).split("&"));
                     if (parsedResponse) {
                         resolve(parsedResponse);
                     } else {

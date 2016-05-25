@@ -24,7 +24,7 @@ var Instagram = (function () {
                 if ((event.url).indexOf(_this.instagramOptions.redirectUri) === 0) {
                     browserRef.removeEventListener("exit", function (event) { });
                     browserRef.close();
-                    var parsedResponse = (new utility_1.OauthUtility()).parseImplicitResponse(((event.url).split("#")[1]).split("&"));
+                    var parsedResponse = utility_1.OauthUtility.parseImplicitResponse(((event.url).split("#")[1]).split("&"));
                     if (parsedResponse) {
                         resolve(parsedResponse);
                     }

@@ -19,7 +19,7 @@
         "src/provider/imgur.ts",
         "src/provider/instagram.ts",
         "src/provider/meetup.ts",
-        "node_modules/typescript/lib/lib.es6.d.ts"
+        "typings/index.d.ts"
     ],
     "exclude": [
         "node_modules"

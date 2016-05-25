@@ -7,6 +7,8 @@ export interface IGoogleOptions {
 export declare class Google implements IOauthProvider {
     googleOptions: IGoogleOptions;
     flowUrl: String;
+    apiUrl: string;
+    approvalUrl: string;
     constructor(options?: IGoogleOptions);
     login(): Promise<{}>;
 }

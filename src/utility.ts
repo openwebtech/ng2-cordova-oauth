@@ -1,6 +1,6 @@
 export class OauthUtility {
 
-    parseImplicitResponse(responseParameters: Array<String>): Object {
+    static parseImplicitResponse(responseParameters: Array<String>): Object {
         var parameterMap = {};
         for (var i = 0; i < responseParameters.length; i++) {
             parameterMap[responseParameters[i].split("=")[0]] = responseParameters[i].split("=")[1];
@@ -10,6 +10,12 @@ export class OauthUtility {
         } else {
             return null;
         }
+    }
+
+    static buildQuery(params: Object): string {
+      return Object.keys(params)
+        .map(key => `${key}=${params[key]}`)
+        .join('&');
     }
 
 }
